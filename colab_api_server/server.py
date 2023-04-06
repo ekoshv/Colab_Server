@@ -40,5 +40,7 @@ class ColabAPIServer:
             return {'error': str(e)}
 
     def run(self):
-        """Run the Colab API server."""
+        """Run the Colab API server and display the public URL."""
+        print(" * Starting Colab API server...")
+        print(f" * Public URL: {self.app.ngrok_url}/execute")
         self.app.run()

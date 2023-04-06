@@ -1,5 +1,5 @@
 import json
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, url_for
 from flask_ngrok import run_with_ngrok
 
 
@@ -41,6 +41,9 @@ class ColabAPIServer:
 
     def run(self):
         """Run the Colab API server and display the public URL."""
+        with self.app.test_request_context():
+            public_url = url_for('execute', _external=True)
+
         print(" * Starting Colab API server...")
-        print(f" * Public URL: {self.app.ngrok_url}/execute")
+        print(f" * Public URL: {public_url}")
         self.app.run()

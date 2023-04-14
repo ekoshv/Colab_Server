@@ -4,7 +4,7 @@ Colab API Server is a Python library that helps set up a REST API server on a Go
 
 ## Installation
 
-pip install git+https://github.com/ekoshv/Colab_Server.git
+pip install --upgrade --no-cache-dir git+https://github.com/ekoshv/Colab_Server.git
 
 ## Usage
 

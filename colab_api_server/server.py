@@ -1,8 +1,7 @@
 import json
-import pickle
-from flask import Flask, request, jsonify, url_for, send_file
+from flask import Flask, request, jsonify, url_for
 from flask_ngrok import run_with_ngrok
-from io import BytesIO
+
 
 class ColabAPIServer:
     def __init__(self):
@@ -16,14 +15,13 @@ class ColabAPIServer:
             Handle the code execution request.
             :return: The result of the code execution.
             """
-            data = request.form
-            code = data.get('code', '')
+            data = request.get_json(force=True)
 
-            input_data_file = request.files['input_data']
-            input_data = pickle.load(input_data_file.stream)
+            code = data.get('code', '')
+            input_data = data.get('input_data', {})
 
             result = self.execute_code(code, input_data)
-            return self.send_result(result)
+            return jsonify(result)
 
     def execute_code(self, code, input_data):
         """
@@ -38,17 +36,6 @@ class ColabAPIServer:
             return local_namespace.get('result', None)
         except Exception as e:
             return {'error': str(e)}
-
-    def send_result(self, result):
-        """
-        Send the result as a file to the client.
-        :param result: The result to be sent.
-        :return: A file containing the result.
-        """
-        result_buffer = BytesIO()
-        pickle.dump(result, result_buffer)
-        result_buffer.seek(0)
-        return send_file(result_buffer, as_attachment=True, attachment_filename='result.pickle', mimetype='application/octet-stream')
 
     def run(self):
         """Run the Colab API server and display the public URL."""

@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="colab_api_server",
-    version="0.1.3",
+    version="0.2.0",
     author='Ehsan KhademOlama',
     author_email='ekoshv.igt@gmail.com',
     description='A Python library for setting up a remote Google Colab API server',

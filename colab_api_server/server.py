@@ -2,6 +2,7 @@ import json
 from flask import Flask, request, jsonify, url_for
 from flask_ngrok import run_with_ngrok
 import pickle
+import base64
 
 class ColabAPIServer:
     def __init__(self):
@@ -11,20 +12,18 @@ class ColabAPIServer:
 
         @self.app.route('/execute', methods=['POST'])
         def execute():
-            """
-            Handle the code execution request.
-            :return: The result of the code execution.
-            """
             data = request.get_json(force=True)
 
             code = data.get('code', '')
-            pickled_input_data = data.get('input_data', b'')
+            base64_input_data = data.get('input_data', '')
+            pickled_input_data = base64.b64decode(base64_input_data)
             input_data = pickle.loads(pickled_input_data)
 
             result = self.execute_code(code, input_data)
 
             pickled_result = pickle.dumps(result)
-            return jsonify({'result': pickled_result})
+            base64_result = base64.b64encode(pickled_result)
+            return jsonify({'result': base64_result.decode('utf-8')})
 
     def execute_code(self, code, input_data):
         """

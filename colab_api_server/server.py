@@ -12,11 +12,15 @@ class ColabAPIServer:
 
         @self.app.route('/execute', methods=['POST'])
         def execute():
+            """
+            Handle the code execution request.
+            :return: The result of the code execution.
+            """
             data = request.get_json(force=True)
 
             code = data.get('code', '')
             base64_input_data = data.get('input_data', '')
-            pickled_input_data = base64.b64decode(base64_input_data)
+            pickled_input_data = base64.b64decode(base64_input_data.encode('utf-8'))
             input_data = pickle.loads(pickled_input_data)
 
             result = self.execute_code(code, input_data)
@@ -48,6 +52,7 @@ class ColabAPIServer:
         print(f" * Public URL: {public_url}")
         self.app.run()
 
-if __name__ == "__main__":
+# Start the server
+if __name__ == '__main__':
     server = ColabAPIServer()
     server.run()

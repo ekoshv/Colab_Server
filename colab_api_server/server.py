@@ -1,7 +1,7 @@
 import json
 from flask import Flask, request, jsonify, url_for
 from flask_ngrok import run_with_ngrok
-
+import pickle
 
 class ColabAPIServer:
     def __init__(self):
@@ -18,10 +18,13 @@ class ColabAPIServer:
             data = request.get_json(force=True)
 
             code = data.get('code', '')
-            input_data = data.get('input_data', {})
+            pickled_input_data = data.get('input_data', b'')
+            input_data = pickle.loads(pickled_input_data)
 
             result = self.execute_code(code, input_data)
-            return jsonify(result)
+
+            pickled_result = pickle.dumps(result)
+            return jsonify({'result': pickled_result})
 
     def execute_code(self, code, input_data):
         """
@@ -45,3 +48,7 @@ class ColabAPIServer:
         print(" * Starting Colab API server...")
         print(f" * Public URL: {public_url}")
         self.app.run()
+
+if __name__ == "__main__":
+    server = ColabAPIServer()
+    server.run()

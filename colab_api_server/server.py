@@ -20,14 +20,14 @@ class ColabAPIServer:
 
             code = data.get('code', '')
             base64_input_data = data.get('input_data', '')
-            pickled_input_data = base64.b64decode(base64_input_data.encode('utf-8'))
+            pickled_input_data = base64.b64decode(base64_input_data)
             input_data = pickle.loads(pickled_input_data)
 
             result = self.execute_code(code, input_data)
 
             pickled_result = pickle.dumps(result)
-            base64_result = base64.b64encode(pickled_result)
-            return jsonify({'result': base64_result.decode('utf-8')})
+            base64_result = base64.b64encode(pickled_result).decode('utf-8')
+            return jsonify({'result': base64_result})
 
     def execute_code(self, code, input_data):
         """
@@ -39,20 +39,4 @@ class ColabAPIServer:
         try:
             local_namespace = {'input_data': input_data}
             exec(code, globals(), local_namespace)
-            return local_namespace.get('result', None)
-        except Exception as e:
-            return {'error': str(e)}
-
-    def run(self):
-        """Run the Colab API server and display the public URL."""
-        with self.app.test_request_context():
-            public_url = url_for('execute', _external=True)
-
-        print(" * Starting Colab API server...")
-        print(f" * Public URL: {public_url}")
-        self.app.run()
-
-# Start the server
-if __name__ == '__main__':
-    server = ColabAPIServer()
-    server.run()
+           

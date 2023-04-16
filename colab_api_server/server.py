@@ -52,4 +52,3 @@ class ColabAPIServer:
         print(" * Starting Colab API server...")
         print(f" * Public URL: {public_url}")
         self.app.run()
-``

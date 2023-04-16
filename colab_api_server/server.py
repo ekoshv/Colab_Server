@@ -28,7 +28,9 @@ class ColabAPIServer:
             pickle.dump(result, pickled_result)
             pickled_result.seek(0)
 
-            return send_file(pickled_result, attachment_filename='result.pkl', as_attachment=True)
+            response = send_file(pickled_result, attachment_filename='result.pkl', as_attachment=True)
+            print(f"Response headers: {response.headers}")  # Debugging print
+            return response
 
     def execute_code(self, code, input_data):
         """
@@ -52,3 +54,6 @@ class ColabAPIServer:
         print(" * Starting Colab API server...")
         print(f" * Public URL: {public_url}")
         self.app.run()
+
+server = ColabAPIServer()
+server.run()

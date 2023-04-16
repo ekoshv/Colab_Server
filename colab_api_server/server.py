@@ -1,5 +1,6 @@
 import base64
 import io
+import pickle
 from flask import Flask, request, jsonify, url_for
 from flask_ngrok import run_with_ngrok
 
@@ -23,10 +24,10 @@ class ColabAPIServer:
             result_object = local_namespace.get('result', None)
 
             if result_object is not None:
-                model_buffer = io.BytesIO()
-                result_object.save(model_buffer)
-                model_buffer.seek(0)
-                result_encoded = base64.b64encode(model_buffer.read()).decode('utf-8')
+                result_buffer = io.BytesIO()
+                pickle.dump(result_object, result_buffer)
+                result_buffer.seek(0)
+                result_encoded = base64.b64encode(result_buffer.read()).decode('utf-8')
             else:
                 result_encoded = None
 

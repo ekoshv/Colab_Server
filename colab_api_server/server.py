@@ -39,4 +39,15 @@ class ColabAPIServer:
         try:
             local_namespace = {'input_data': input_data}
             exec(code, globals(), local_namespace)
-           
+            return local_namespace.get('result', None)
+        except Exception as e:
+            return {'error': str(e)}
+
+    def run(self):
+        """Run the Colab API server and display the public URL."""
+        with self.app.test_request_context():
+            public_url = url_for('execute', _external=True)
+
+        print(" * Starting Colab API server...")
+        print(f" * Public URL: {public_url}")
+        self.app.run()

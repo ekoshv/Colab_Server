@@ -20,8 +20,11 @@ class ColabAPIServer:
 
             code = data.get('code', '')
             base64_input_data = data.get('input_data', '')
-            pickled_input_data = base64.b64decode(base64_input_data)
-            input_data = pickle.loads(pickled_input_data)
+            if base64_input_data:
+                pickled_input_data = base64.b64decode(base64_input_data)
+                input_data = pickle.loads(pickled_input_data)
+            else:
+                input_data = {}
 
             result = self.execute_code(code, input_data)
 

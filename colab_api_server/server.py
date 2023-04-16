@@ -1,4 +1,5 @@
-import json
+import base64
+import pickle
 from flask import Flask, request, jsonify, url_for
 from flask_ngrok import run_with_ngrok
 
@@ -22,6 +23,16 @@ class ColabAPIServer:
             result = self.execute_code(code, input_data)
             return jsonify(result)
 
+    def serialize_data(self, data):
+        """Serialize data using pickle and encode it with base64."""
+        serialized_data = pickle.dumps(data)
+        return base64.b64encode(serialized_data).decode('utf-8')
+
+    def deserialize_data(self, data_str):
+        """Decode base64 data and deserialize it using pickle."""
+        decoded_data = base64.b64decode(data_str.encode('utf-8'))
+        return pickle.loads(decoded_data)
+
     def execute_code(self, code, input_data):
         """
         Execute the provided code with the given input data.
@@ -31,8 +42,18 @@ class ColabAPIServer:
         """
         try:
             local_namespace = {'input_data': input_data}
+
+            if 'complex_input' in input_data:
+                complex_input = self.deserialize_data(input_data['complex_input'])
+                local_namespace['complex_input'] = complex_input
+
             exec(code, globals(), local_namespace)
-            return local_namespace.get('result', None)
+
+            if 'result' in local_namespace and isinstance(local_namespace['result'], (tuple, list, dict, set)):
+                local_namespace['complex_result'] = self.serialize_data(local_namespace['result'])
+                del local_namespace['result']
+
+            return local_namespace
         except Exception as e:
             return {'error': str(e)}
 
@@ -44,4 +65,3 @@ class ColabAPIServer:
         print(" * Starting Colab API server...")
         print(f" * Public URL: {public_url}")
         self.app.run()
-        

@@ -1,8 +1,8 @@
 import json
-from flask import Flask, request, jsonify, url_for
-from flask_ngrok import run_with_ngrok
 import pickle
-import base64
+from flask import Flask, request, jsonify, url_for, send_file
+from flask_ngrok import run_with_ngrok
+from io import BytesIO
 
 class ColabAPIServer:
     def __init__(self):
@@ -16,21 +16,19 @@ class ColabAPIServer:
             Handle the code execution request.
             :return: The result of the code execution.
             """
-            data = request.get_json(force=True)
+            code_file = request.files['code']
+            code = code_file.read().decode('utf-8')
 
-            code = data.get('code', '')
-            base64_input_data = data.get('input_data', '')
-            if base64_input_data:
-                pickled_input_data = base64.b64decode(base64_input_data)
-                input_data = pickle.loads(pickled_input_data)
-            else:
-                input_data = {}
+            input_data_file = request.files['input_data']
+            input_data = pickle.load(input_data_file)
 
             result = self.execute_code(code, input_data)
 
-            pickled_result = pickle.dumps(result)
-            base64_result = base64.b64encode(pickled_result).decode('utf-8')
-            return jsonify({'result': base64_result})
+            pickled_result = BytesIO()
+            pickle.dump(result, pickled_result)
+            pickled_result.seek(0)
+
+            return send_file(pickled_result, attachment_filename='result.pkl', as_attachment=True)
 
     def execute_code(self, code, input_data):
         """
@@ -54,3 +52,4 @@ class ColabAPIServer:
         print(" * Starting Colab API server...")
         print(f" * Public URL: {public_url}")
         self.app.run()
+``
